@@ -41,6 +41,6 @@ volumes:
 
 networks:
   warehouse-net:
-    external: false
+    external: true
   sourcesystem-net:
-    external: false
+    external: true
