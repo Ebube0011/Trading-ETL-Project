@@ -14,13 +14,13 @@ services:
       - sourcesystem-net
     volumes:
       - mydb:/var/lib/mysql
-      - ./db/data:/var/lib/mysql
-      - ./db/log:/var/log/mysql
-      - ./db/conf:/etc/mysql/conf.d
+      - ./mysql_db/data:/var/lib/mysql
+      - ./mysql_db/log:/var/log/mysql
+      - ./mysql_db/conf:/etc/mysql/conf.d
       - ./Generation/sql_scripts/mysql:/docker-entrypoint-initdb.d
   
   warehouse: 
-    image: postgres:13
+    image: postgres:latest
     container_name: warehouse
     environment: 
       POSTGRES_USER: ${POSTGRES_USER}
@@ -28,6 +28,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB}
     volumes: 
       - postgres-volume:/var/lib/postgresql/data
+      - ./postgres_db:/var/lib/postgresql/data
       - ./Generation/sql_scripts/postgres:/docker-entrypoint-initdb.d
     restart: always
     ports: 
