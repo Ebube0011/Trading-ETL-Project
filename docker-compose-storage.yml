@@ -1,0 +1,46 @@
+version: '3'
+services:
+  mysql:
+    image: mysql:latest
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    networks:
+      - sourcesystem-net
+    volumes:
+      - mydb:/var/lib/mysql
+      - ./db/data:/var/lib/mysql
+      - ./db/log:/var/log/mysql
+      - ./db/conf:/etc/mysql/conf.d
+      - ./Generation/sql_scripts/mysql:/docker-entrypoint-initdb.d
+  
+  warehouse: 
+    image: postgres:13
+    container_name: warehouse
+    environment: 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes: 
+      - postgres-volume:/var/lib/postgresql/data
+      - ./Generation/sql_scripts/postgres:/docker-entrypoint-initdb.d
+    restart: always
+    ports: 
+      - "5432:5432"
+    networks:
+      - warehouse-net
+
+volumes:
+  my-db:
+  postgres-volume:
+
+networks:
+  warehouse-net:
+    external: false
+  sourcesystem-net:
+    external: false

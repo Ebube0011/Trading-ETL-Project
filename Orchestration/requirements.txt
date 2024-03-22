@@ -1,0 +1,5 @@
+pandas
+configparser
+sqlalchemy
+mysql-connector-python
+psycopg2-binary
