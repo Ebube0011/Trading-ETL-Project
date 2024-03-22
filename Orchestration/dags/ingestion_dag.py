@@ -24,7 +24,7 @@ default_args = {
 
 # define the DAG
 dag = DAG(
-    dag_id='Data _Ingestion',
+    dag_id='Data_Ingestion',
     default_args=default_args,
     description='ETL from application database into Data Warehouse',
     schedule_interval='@daily'
