@@ -69,19 +69,10 @@ x-airflow-common:
     # WARNING: Use _PIP_ADDITIONAL_REQUIREMENTS option ONLY for a quick checks
     # for other purpose (development, test and especially production usage) build/extend Airflow image.
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
-    # Storage details
-    POSTGRES_USER: ${POSTGRES_USER}
-    POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-    POSTGRES_DB: ${POSTGRES_DB}
-    POSTGRES_HOST: ${POSTGRES_HOST}
-    POSTGRES_PORT: ${POSTGRES_PORT}
-    MYSQL_USER: ${MYSQL_USER}
-    MYSQL_PASSWORD: ${MYSQL_PASSWORD}
-    MYSQL_DB: ${MYSQL_DB}
-    MYSQL_HOST: ${MYSQL_HOST}
-    MYSQL_PORT: ${MYSQL_PORT}
-    TABLE_NAME: ${TABLE_NAME}
-    FILE_PATH: ${FILE_PATH}
+  env_file:
+    - ./environment_variables/postgres.env
+    - ./environment_variables/mysql.env
+    - ./environment_variables/others.env
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/Orchestration/dags:/opt/airflow/dags
     - ${AIRFLOW_PROJ_DIR:-.}/Ingestion:/opt/airflow/dags/Ingestion
