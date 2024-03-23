@@ -1,15 +1,61 @@
+import os
 from datetime import timedelta
-# The DAG object; we'll need this to instantiate a DAG
-from airflow import DAG
-# Operators; we need this to write tasks!
-#from airflow.operators.bash_operator import BashOperator
-# This makes scheduling easy
+from airflow.models.dag import DAG
+from airflow.decorators import task
+from airflow.utils.task_group import TaskGroup
 from airflow.utils.dates import days_ago
-from airflow.operators.python_operator import PythonOperator
-from Ingestion.main_pipeline import main_etl
+import pandas as pd
+from Ingestion.storage.connection import close_conn, create_conn #create_db_conn
+from Ingestion.extract.to_landing import load_table_to_landing
+from Ingestion.transformation.etl import (
+    clean_data,
+    create_schema,
+    load_tables_staging,
+    read_table,
+)
 
-#defining DAG arguments
-# You can override them on a per-task basis during operator initialization
+
+
+# Extract tasks
+@task()
+def etl_to_landing():
+
+    engine = create_conn()
+
+    file_path = '/opt/airflow/dags/data/Warehouse_and_Retail_Sales.csv'#os.getenv('FILE_PATH')
+    table_name = os.getenv('TABLE_NAME')
+
+    df = pd.read_csv(file_path)
+    load_table_to_landing(df, engine, table_name)
+
+    close_conn(engine)
+
+# Transformation tasks
+@task()
+def transform_data():
+
+    engine = create_conn()
+
+    table_name = os.getenv('TABLE_NAME')
+    df = read_table(engine, table_name)
+    df_clean = clean_data(df)
+    dict_tables = create_schema(df_clean)
+
+    close_conn(engine)
+    return dict_tables
+
+
+# Loading tasks
+@task()
+def load_data(dict_tables: dict):
+
+    engine = create_conn()
+
+    load_tables_staging(dict_tables, engine)
+
+    close_conn(engine)
+
+# Start task group
 default_args = {
     'owner': 'Ebube',
     'start_date': days_ago(0),
@@ -21,35 +67,24 @@ default_args = {
     'retries': 3,
     'retry_delay': timedelta(minutes=5),
 }
+with DAG(dag_id='testing_etl_dag',
+         default_args=default_args,
+         description='ETL from raw data into Data Warehouse',
+         schedule_interval= '@daily',
+         catchup=False) as dag:
+    
+    with TaskGroup('extract', 
+                   tooltip='Extract and load source data into landing') as extract_to_landing:
+        extract = etl_to_landing()
+        # define task order
+        extract
+    
+    with TaskGroup('transform_dataset', 
+                   tooltip='Transform and stage data') as transform_to_staging:
+        transformed_dataset = transform_data()
+        load_dataset = load_data(transformed_dataset)
+        # define task order
+        transformed_dataset >> load_dataset
 
-# define the DAG
-dag = DAG(
-    dag_id='Data_Ingestion',
-    default_args=default_args,
-    description='ETL from application database into Data Warehouse',
-    schedule_interval='@daily'
-    #schedule_interval='@once', # @hourly, @daily, @weekly, @monthly, @yearly	
-)
-
-# define the tasks
-# define the first task named extract
-extract = PythonOperator(
-    task_id= 'ETL',
-    python_callable= main_etl,
-    dag= dag
-)
-# define the second task named transform
-#transform = PythonOperator(
-#    task_id= 'Transform and model the data',
-#    python_callable= ingestion_dag.transform(),
-#    dag= dag
-#)
-# define the third task named load
-#load = PythonOperator(
-#    task_id= 'Load the data into data warehouse',
-#    python_callable= ingestion_dag.load(),
-#    dag= dag
-#)
-
-# task pipeline
-extract
+    # define task group order
+    extract_to_landing >> transform_to_staging
