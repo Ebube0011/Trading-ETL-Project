@@ -21,4 +21,4 @@ def load_table_to_landing(df, engine, table_name):
         logger.info("Table loaded to the landing area!!!")
     except Exception as e:
         logger.error("!!!!!!!!!!!!!!!!!!!!!!")
-        logger.error(f"Enable to load the data to landing area : {e}")
+        logger.error(f"Unable to load the data to landing area : {e}")
