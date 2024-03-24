@@ -17,7 +17,7 @@ def main_etl():
     engine = create_db_conn()
 
     """ Landing area """
-    file_path = '/opt/airflow/dags/data/Warehouse_and_Retail_Sales.csv'#os.getenv('FILE_PATH')
+    file_path = os.getenv('FILE_PATH')
     table_name = os.getenv('TABLE_NAME')
 
     df = pd.read_csv(file_path)
