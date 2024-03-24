@@ -1,3 +1,3 @@
 \c retail_sales
-CREATE DATABASE landing_area; 
-CREATE DATABASE staging_area;
+CREATE SCHEMA landing_area; 
+CREATE SCHEMA staging_area;
