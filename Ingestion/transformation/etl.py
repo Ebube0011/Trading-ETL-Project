@@ -20,7 +20,7 @@ def read_table(engine, table_name):
         return df
     except Exception as e:
         logger.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
-        logger.error(f'Enable to read data from landing_area: {e}')
+        logger.error(f'Unable to read data from landing_area: {e}')
 
 
 def clean_data(df):
@@ -88,7 +88,7 @@ def load_tables_staging(dict, engine):
         for df_name, value_dict in dict.items():
             value_df = pd.DataFrame(value_dict)
             logger.info(
-                f'Importing {len(value_df)} rows from'
+                f'Importing {len(value_df)} rows from '
                 f'landing_area to staging_area.{df_name}'
             )
             value_df.to_sql(
@@ -104,4 +104,4 @@ def load_tables_staging(dict, engine):
 
     except Exception as e:
         logger.error("!!!!!!!!!!!!!!!!!!!!!!")
-        logger.error(f"Enable to load the data to staging area : {e}")
+        logger.error(f"Unable to load the data to staging area : {e}")
