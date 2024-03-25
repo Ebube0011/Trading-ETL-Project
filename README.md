@@ -28,6 +28,7 @@ Inside the 'environment_variables' folder, there are files that will be used to 
 Be careful if using the 'file path' with airflow as airflow runs its dags in a seperate file path than is in the container. In this case, either use an absolute file path or use code to identify current working directory.
 
 ### Run the storage containers
+After modifying the environment variables, return to the project directory and proceed to run the storage services. 
 This is done by using the 'docker compose' command. we start by running the services for the storages, and then the services for orchestration
 For the storages; transactional and warehouse, using a terminal each
 ```
