@@ -40,7 +40,12 @@ docker compose -f docker-compose-orchestration.yml up
 ```
 
 ### Test
-The app can be tested by using a dockerfile to check the performance of the python script. Open another terminal, enter into the test folder, then enter
+To view results on data warehouse and manually query it
+```
+docker exec -it warehouse bash
+psql -U postgres
+```
+The pipeline can be tested by putting the code in a seperate container using a dockerfile to check the performance of the python script. Open another terminal, enter into the test folder, then enter
 ```
 # incase it already exists
 docker image rm pipeline:latest -f
