@@ -5,7 +5,7 @@ from airflow.decorators import task
 from airflow.utils.task_group import TaskGroup
 from airflow.utils.dates import days_ago
 import pandas as pd
-from Ingestion.storage.connection import close_conn, create_conn #create_db_conn
+from Ingestion.storage.connection import close_conn, create_db_conn #create_conn
 from Ingestion.extract.to_landing import load_table_to_landing
 from Ingestion.transformation.etl import (
     clean_data,
@@ -20,21 +20,22 @@ from Ingestion.transformation.etl import (
 @task()
 def etl_to_landing():
 
-    engine = create_conn()
+    engine = create_db_conn()
 
-    file_path = '/opt/airflow/dags/data/Warehouse_and_Retail_Sales.csv'#os.getenv('FILE_PATH')
+    file_path = os.getenv('FILE_PATH')
     table_name = os.getenv('TABLE_NAME')
 
     df = pd.read_csv(file_path)
     load_table_to_landing(df, engine, table_name)
 
     close_conn(engine)
+    return {'table(s) loaded' : 'Data imported successfully'}
 
 # Transformation tasks
 @task()
 def transform_data():
 
-    engine = create_conn()
+    engine = create_db_conn()
 
     table_name = os.getenv('TABLE_NAME')
     df = read_table(engine, table_name)
@@ -49,11 +50,12 @@ def transform_data():
 @task()
 def load_data(dict_tables: dict):
 
-    engine = create_conn()
+    engine = create_db_conn()
 
     load_tables_staging(dict_tables, engine)
 
     close_conn(engine)
+    return {'table(s) loaded' : 'Data imported successfully'}
 
 # Start task group
 default_args = {
@@ -73,8 +75,8 @@ with DAG(dag_id='testing_etl_dag',
          schedule_interval= '@daily',
          catchup=False) as dag:
     
-    with TaskGroup('extract', 
-                   tooltip='Extract and load source data into landing') as extract_to_landing:
+    with TaskGroup('extract_source_data', 
+                   tooltip='Extract and load source data to landing') as extract_to_landing:
         extract = etl_to_landing()
         # define task order
         extract
