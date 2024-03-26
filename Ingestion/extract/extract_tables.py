@@ -1,7 +1,7 @@
 import time
-from sqlalchemy import create_engine
 import logging
 import pandas as pd
+from Ingestion.extract.to_landing import load_table_to_landing, read_source_table
 
 logging.basicConfig(
     level=logging.INFO,
@@ -10,30 +10,28 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 
-def get_src_tables():
-    #hook = MsSqlHook(mssql_conn_id='sqlserver')
-    sql = """SELECT t.name AS table_name 
-    FROM sys.tables
-    WHERE t.name IN ('DimProduct', 'DimProductSubCategory', 'DimProductCategory')"""
-    df = hook.get_pandas_df(sql)
-    tbl_dict = df.to_dict('dict')
-    return tbl_dict
+def get_src_tables(engine):
+    
+    query = """SELECT t.name AS table_name 
+            FROM sys.tables t
+            WHERE t.name IN ('DimProduct', 'DimProductSubCategory', 'DimProductCategory')"""
+    try:
+        df = pd.read_sql_query(query, engine)
+        tbl_dict = df.to_dict('dict')
+        logger.info('Table names read from the source system!!!!')
+        return tbl_dict
+    except Exception as e:
+        logger.error('!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!')
+        logger.error(f'Unable to get tables from source system: {e}')
 
 
-def load_src_data(tbl_dict: dict):
-    conn = BaseHook.get_connection('postgres')
-    engine = create_engine(f'postgresql://{conn.login}:{conn.password}@{conn.host}:{conn.port}/{conn.schema}')
-    all_tbl_name = []
+def load_src_data(engine, tbl_dict: dict):
+    
     start_time = time.time()
     for k, v in tbl_dict['table_name'].items():
-        all_tbl_name.append(v)
-        rows_imported = 8
-        sql = f'SELECT * FROM {v}'
-        hook = MsSqlHook(mssql_conn_id='sqlserver')
-        df = hook.get_pandas_df(sql)
-        print(f'Importing rows {rows_imported} to {rows_imported + len(df)}... for table {v}')
-        df.to_sql(f'src_{v}', engine, if_exists= 'replace', index=False)
-        rows_imported += len(df)
-        print(f'Done. {str(round(time.time() - start_time, 2))} total seconds elapsed')
+        df = read_source_table(engine, v)
+        print(f'Importing rows 0 to {len(df)}... for table {v}')
+        load_table_to_landing(df, engine, f'src_{v}')
+        logger.info('Table read from the source system!!!!')
+        logger.info(f'{str(round(time.time() - start_time, 2))} total seconds elapsed')
     print ('Data Imported successfully')
-    return all_tbl_name
