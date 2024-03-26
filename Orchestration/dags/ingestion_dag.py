@@ -6,7 +6,7 @@ from airflow.utils.task_group import TaskGroup
 from airflow.utils.dates import days_ago
 import pandas as pd
 from Ingestion.storage.connection import close_conn, create_db_conn #create_conn
-from Ingestion.extract.to_landing import load_table_to_landing
+from Ingestion.extract.to_landing import load_table_to_landing, read_source_table
 from Ingestion.transformation.etl import (
     clean_data,
     create_schema,
@@ -18,14 +18,30 @@ from Ingestion.transformation.etl import (
 
 # Extract tasks
 @task()
-def etl_to_landing():
+def extract_from_source_system():
+
+    engine = create_db_conn(storage_use="application")
+
+    #file_path = os.getenv('FILE_PATH')
+    table_name = os.getenv('SOURCE_TABLE_NAME')
+
+    #df = pd.read_csv(file_path)
+    df = read_source_table(engine, table_name)
+
+    close_conn(engine)
+    return {"table(s) read" : "Data read successful",
+            "Dataset": df.to_dict(orient="dict")}
+
+@task()
+def etl_to_landing(dict_table: dict):
 
     engine = create_db_conn()
 
-    file_path = os.getenv('FILE_PATH')
+    #file_path = os.getenv('FILE_PATH')
     table_name = os.getenv('TABLE_NAME')
 
-    df = pd.read_csv(file_path)
+    #df = pd.read_csv(file_path)
+    df = pd.DataFrame(dict_table['Dataset'])
     load_table_to_landing(df, engine, table_name)
 
     close_conn(engine)
@@ -77,9 +93,10 @@ with DAG(dag_id='testing_etl_dag',
     
     with TaskGroup('extract_source_data', 
                    tooltip='Extract and load source data to landing') as extract_to_landing:
-        extract = etl_to_landing()
+        extract_data = extract_from_source_system()
+        load_to_landing = etl_to_landing(extract_data)
         # define task order
-        extract
+        extract_data >> load_to_landing
     
     with TaskGroup('transform_dataset', 
                    tooltip='Transform and stage data') as transform_to_staging:

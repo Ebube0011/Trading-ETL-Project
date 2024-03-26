@@ -32,7 +32,7 @@ def create_db_conn(storage_use: str = "warehouse"):
     if (storage_use == "warehouse"):
         db_name = "postgresql"
         credentials = get_warehouse_creds()
-    elif (storage_use == "transaction"):
+    elif (storage_use == "application"):
         db_name = "mysql+mysqlconnector"
         credentials = get_transaction_db_creds()
     
