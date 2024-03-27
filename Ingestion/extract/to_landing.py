@@ -1,5 +1,6 @@
 import logging
 import pandas as pd
+from datetime import date
 
 logging.basicConfig(
     level=logging.INFO,
@@ -11,8 +12,17 @@ logger = logging.getLogger(__name__)
 
 def read_source_table(engine, table_name):
     """read data from the application dastabase table"""
-    query = f"""SELECT * 
-            FROM {table_name}"""
+    if (table_name == 'Trading_operation'):
+        format = "%Y-%m-%d"
+        #today = date.today()
+        today = date(year=2020, month=1, day=20)
+        today = today.strftime(format)
+        query = f""" SELECT *
+                FROM {table_name}
+                WHERE trade_date IS '{str(today)}'"""
+    else:
+        query = f"""SELECT * 
+                FROM {table_name}"""
     try:
         df = pd.read_sql_query(query, engine)
         logger.info('Table read from the source system!!!!')

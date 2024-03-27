@@ -14,7 +14,7 @@ def get_src_tables(engine):
     
     query = """SELECT t.name AS table_name 
             FROM sys.tables t
-            WHERE t.name IN ('DimProduct', 'DimProductSubCategory', 'DimProductCategory')"""
+            WHERE t.name IN ('Market', 'Sector', 'Trading_system', 'Operation', Trading_operation)"""
     try:
         df = pd.read_sql_query(query, engine)
         tbl_dict = df.to_dict('dict')
@@ -31,7 +31,7 @@ def load_src_data(engine, tbl_dict: dict):
     for k, v in tbl_dict['table_name'].items():
         df = read_source_table(engine, v)
         print(f'Importing rows 0 to {len(df)}... for table {v}')
-        load_table_to_landing(df, engine, f'src_{v}')
+        load_table_to_landing(df, engine, v)
         logger.info('Table read from the source system!!!!')
         logger.info(f'{str(round(time.time() - start_time, 2))} total seconds elapsed')
     print ('Data Imported successfully')
