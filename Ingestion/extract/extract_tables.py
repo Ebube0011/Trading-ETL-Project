@@ -1,3 +1,4 @@
+import os
 import time
 import logging
 import pandas as pd
@@ -12,9 +13,12 @@ logger = logging.getLogger(__name__)
 
 def get_src_tables(engine):
     
-    query = """SELECT t.name AS table_name 
-            FROM sys.tables t
-            WHERE t.name IN ('Market', 'Sector', 'Trading_system', 'Operation', Trading_operation)"""
+    database=os.getenv('MYSQL_DB', '')
+    query = f"""SELECT table_name
+            FROM information_schema.tables 
+            WHERE table_schema = '{database}' 
+                AND table_type = 'BASE_TABLE'
+                AND table_name IN ('Market', 'Sector', 'Trading_system', 'Operation', Trading_operation)"""
     try:
         df = pd.read_sql_query(query, engine)
         tbl_dict = df.to_dict('dict')
@@ -32,6 +36,6 @@ def load_src_data(engine, tbl_dict: dict):
         df = read_source_table(engine, v)
         print(f'Importing rows 0 to {len(df)}... for table {v}')
         load_table_to_landing(df, engine, v)
-        logger.info('Table read from the source system!!!!')
+        logger.info(f'Table ({v}) read from the source system and loaded successfully!!!!')
         logger.info(f'{str(round(time.time() - start_time, 2))} total seconds elapsed')
     print ('Data Imported successfully')

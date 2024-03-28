@@ -13,13 +13,13 @@ logger = logging.getLogger(__name__)
 def read_source_table(engine, table_name):
     """read data from the application dastabase table"""
     if (table_name == 'Trading_operation'):
-        format = "%Y-%m-%d"
+        #format = "%Y-%m-%d"
         #today = date.today()
-        today = date(year=2020, month=1, day=20)
-        today = today.strftime(format)
+        #today = today.strftime(format)
+        today = date(year=2020)#, month=1, day=20)
         query = f""" SELECT *
                 FROM {table_name}
-                WHERE trade_date IS '{str(today)}'"""
+                WHERE trade_date LIKE '{str(today)}%'"""
     else:
         query = f"""SELECT * 
                 FROM {table_name}"""
