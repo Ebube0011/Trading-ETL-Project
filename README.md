@@ -8,8 +8,7 @@ git clone https://github.com/Ebube0011/Trading-ETL-Project.git
 ```
 Next, install docker and python
 ```
-chmod a+x docker_setup.sh
-chmod a+x python_setup.sh
+chmod a+x docker_setup.sh python_setup.sh
 
 # run the shell scripts
 ./docker_setup.sh
@@ -33,10 +32,10 @@ This is done by using the 'docker compose' command. we start by running the serv
 For the storages; transactional and warehouse, using a terminal each
 ```
 # for storages
-docker compose -f docker-compose-storage.yml up 
+docker compose -f docker-compose-storage.yml up -d
 
 # for the orchestration (airflow)
-docker compose -f docker-compose-orchestration.yml up
+docker compose -f docker-compose-orchestration.yml up -d
 ```
 
 ### Test
@@ -44,6 +43,9 @@ To view results on data warehouse and manually query it
 ```
 docker exec -it warehouse bash
 psql -U postgres
+
+\c TFEmployee
+SELECT * FROM landing_area."Trade_results"
 ```
 The pipeline can be tested by putting the code in a seperate container using a dockerfile to check the performance of the python script. Open another terminal, enter into the test folder, then enter
 ```
@@ -57,6 +59,7 @@ docker build -t pipeline:latest .
 docker run --rm -it --env-file ../environment_variables/postgres.env --env-file ../environment_variables/others.env --network warehouse-net pipeline bash
 
 # run the main pipeline script
+cp Ingestion/main_pipeline.py .
 python3 main_pipeline.py
 ```
 
