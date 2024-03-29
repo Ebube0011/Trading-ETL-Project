@@ -10,6 +10,111 @@ SET time_zone = "+00:00";
 
 
 
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Database: `TFEmployee`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dataset_2018`
+-- (See below for the actual view)
+--
+CREATE TABLE `dataset_2018` (
+`market` varchar(20)
+,`op_type` varchar(10)
+,`profit` decimal(6,5)
+,`sector` varchar(20)
+,`system_code` decimal(3,2)
+,`system_name` varchar(20)
+,`trade_date` date
+,`trade_id` int
+,`trade_identifier` varchar(20)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dataset_2019`
+-- (See below for the actual view)
+--
+CREATE TABLE `dataset_2019` (
+`market` varchar(20)
+,`op_type` varchar(10)
+,`profit` decimal(6,5)
+,`sector` varchar(20)
+,`system_code` decimal(3,2)
+,`system_name` varchar(20)
+,`trade_date` date
+,`trade_id` int
+,`trade_identifier` varchar(20)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dataset_2020`
+-- (See below for the actual view)
+--
+CREATE TABLE `dataset_2020` (
+`market` varchar(20)
+,`op_type` varchar(10)
+,`profit` decimal(6,5)
+,`sector` varchar(20)
+,`system_code` decimal(3,2)
+,`system_name` varchar(20)
+,`trade_date` date
+,`trade_id` int
+,`trade_identifier` varchar(20)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dataset_2021`
+-- (See below for the actual view)
+--
+CREATE TABLE `dataset_2021` (
+`market` varchar(20)
+,`op_type` varchar(10)
+,`profit` decimal(6,5)
+,`sector` varchar(20)
+,`system_code` decimal(3,2)
+,`system_name` varchar(20)
+,`trade_date` date
+,`trade_id` int
+,`trade_identifier` varchar(20)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `dataset_2022`
+-- (See below for the actual view)
+--
+CREATE TABLE `dataset_2022` (
+`market` varchar(20)
+,`op_type` varchar(10)
+,`profit` decimal(6,5)
+,`sector` varchar(20)
+,`system_code` decimal(3,2)
+,`system_name` varchar(20)
+,`trade_date` date
+,`trade_id` int
+,`trade_identifier` varchar(20)
+);
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Market`
+--
+
 CREATE TABLE `Market` (
   `market_id` int NOT NULL,
   `market_name` varchar(20) DEFAULT NULL,
@@ -77,6 +182,24 @@ INSERT INTO `Sector` (`sector_id`, `sector_name`) VALUES
 (3, 'Agric'),
 (4, 'Indices'),
 (5, 'Fixed-income');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `todays_closed_trades`
+-- (See below for the actual view)
+--
+CREATE TABLE `todays_closed_trades` (
+`market` varchar(20)
+,`op_type` varchar(10)
+,`profit` decimal(6,5)
+,`sector` varchar(20)
+,`system_code` decimal(3,2)
+,`system_name` varchar(20)
+,`trade_date` date
+,`trade_id` int
+,`trade_identifier` varchar(20)
+);
 
 -- --------------------------------------------------------
 
@@ -1486,6 +1609,60 @@ INSERT INTO `Trading_System` (`system_id`, `system_description_entry`, `system_d
 (3, 'Entry-  the markets current price breaks above or below the 50 period channel of the last candle', '  Exit- Price either crosses the stop loss or breaks below or above 25 period channel of the last 2 candles depending on the trend', ' Trend-  crossing of the 10 and 250 ma up or down to signify an uptrend or downtrend respectively.', '2.00', '50 CB Instant', NULL, NULL),
 (4, 'Entry-  close of the markets previous days price above or below the 50 period channel of the last 2 candles', '  Exit- Price either crosses the stop loss or breaks below or above 25 period channel of the last 2 candles depending on the trend', ' Trend-  crossing of the 10 and 250 ma up or down to signify an uptrend or downtrend respectively.', '2.10', '50 CB Close', NULL, NULL);
 
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dataset_2018`
+--
+DROP TABLE IF EXISTS `dataset_2018`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `dataset_2018`  AS  with `closed_trades` as (select `tro`.`trade_id` AS `trade_id`,`tro`.`trade_identifier` AS `trade_identifier`,`tro`.`trade_date` AS `trade_date`,`op`.`op_type` AS `op_type`,`tro`.`system_id` AS `system_id`,`tro`.`market_id` AS `market_id`,`tro`.`profit` AS `profit` from (`Trading_operation` `tro` left join `Operation` `op` on((`tro`.`operation_id` = `op`.`op_id`))) where (`op`.`op_type` = 'close')), `market_sector` as (select `m`.`market_id` AS `market_id`,`m`.`market_name` AS `market`,`s`.`sector_name` AS `sector` from (`Market` `m` left join `Sector` `s` on((`m`.`sector_id` = `s`.`sector_id`)))), `system_identifier` as (select `ts`.`system_id` AS `system_id`,`ts`.`system_code` AS `system_code`,`ts`.`system_name` AS `system_name` from `Trading_System` `ts`) select `ct`.`trade_id` AS `trade_id`,`ct`.`trade_identifier` AS `trade_identifier`,`ct`.`trade_date` AS `trade_date`,`ct`.`op_type` AS `op_type`,`si`.`system_code` AS `system_code`,`si`.`system_name` AS `system_name`,`ct`.`profit` AS `profit`,`ms`.`market` AS `market`,`ms`.`sector` AS `sector` from ((`closed_trades` `ct` left join `market_sector` `ms` on((`ct`.`market_id` = `ms`.`market_id`))) left join `system_identifier` `si` on((`ct`.`system_id` = `si`.`system_id`))) where (`ct`.`trade_date` like '2018%') ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dataset_2019`
+--
+DROP TABLE IF EXISTS `dataset_2019`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `dataset_2019`  AS  with `closed_trades` as (select `tro`.`trade_id` AS `trade_id`,`tro`.`trade_identifier` AS `trade_identifier`,`tro`.`trade_date` AS `trade_date`,`op`.`op_type` AS `op_type`,`tro`.`system_id` AS `system_id`,`tro`.`market_id` AS `market_id`,`tro`.`profit` AS `profit` from (`Trading_operation` `tro` left join `Operation` `op` on((`tro`.`operation_id` = `op`.`op_id`))) where (`op`.`op_type` = 'close')), `market_sector` as (select `m`.`market_id` AS `market_id`,`m`.`market_name` AS `market`,`s`.`sector_name` AS `sector` from (`Market` `m` left join `Sector` `s` on((`m`.`sector_id` = `s`.`sector_id`)))), `system_identifier` as (select `ts`.`system_id` AS `system_id`,`ts`.`system_code` AS `system_code`,`ts`.`system_name` AS `system_name` from `Trading_System` `ts`) select `ct`.`trade_id` AS `trade_id`,`ct`.`trade_identifier` AS `trade_identifier`,`ct`.`trade_date` AS `trade_date`,`ct`.`op_type` AS `op_type`,`si`.`system_code` AS `system_code`,`si`.`system_name` AS `system_name`,`ct`.`profit` AS `profit`,`ms`.`market` AS `market`,`ms`.`sector` AS `sector` from ((`closed_trades` `ct` left join `market_sector` `ms` on((`ct`.`market_id` = `ms`.`market_id`))) left join `system_identifier` `si` on((`ct`.`system_id` = `si`.`system_id`))) where (`ct`.`trade_date` like '2019%') ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dataset_2020`
+--
+DROP TABLE IF EXISTS `dataset_2020`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `dataset_2020`  AS  with `closed_trades` as (select `tro`.`trade_id` AS `trade_id`,`tro`.`trade_identifier` AS `trade_identifier`,`tro`.`trade_date` AS `trade_date`,`op`.`op_type` AS `op_type`,`tro`.`system_id` AS `system_id`,`tro`.`market_id` AS `market_id`,`tro`.`profit` AS `profit` from (`Trading_operation` `tro` left join `Operation` `op` on((`tro`.`operation_id` = `op`.`op_id`))) where (`op`.`op_type` = 'close')), `market_sector` as (select `m`.`market_id` AS `market_id`,`m`.`market_name` AS `market`,`s`.`sector_name` AS `sector` from (`Market` `m` left join `Sector` `s` on((`m`.`sector_id` = `s`.`sector_id`)))), `system_identifier` as (select `ts`.`system_id` AS `system_id`,`ts`.`system_code` AS `system_code`,`ts`.`system_name` AS `system_name` from `Trading_System` `ts`) select `ct`.`trade_id` AS `trade_id`,`ct`.`trade_identifier` AS `trade_identifier`,`ct`.`trade_date` AS `trade_date`,`ct`.`op_type` AS `op_type`,`si`.`system_code` AS `system_code`,`si`.`system_name` AS `system_name`,`ct`.`profit` AS `profit`,`ms`.`market` AS `market`,`ms`.`sector` AS `sector` from ((`closed_trades` `ct` left join `market_sector` `ms` on((`ct`.`market_id` = `ms`.`market_id`))) left join `system_identifier` `si` on((`ct`.`system_id` = `si`.`system_id`))) where (`ct`.`trade_date` like '2020%') ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dataset_2021`
+--
+DROP TABLE IF EXISTS `dataset_2021`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `dataset_2021`  AS  with `closed_trades` as (select `tro`.`trade_id` AS `trade_id`,`tro`.`trade_identifier` AS `trade_identifier`,`tro`.`trade_date` AS `trade_date`,`op`.`op_type` AS `op_type`,`tro`.`system_id` AS `system_id`,`tro`.`market_id` AS `market_id`,`tro`.`profit` AS `profit` from (`Trading_operation` `tro` left join `Operation` `op` on((`tro`.`operation_id` = `op`.`op_id`))) where (`op`.`op_type` = 'close')), `market_sector` as (select `m`.`market_id` AS `market_id`,`m`.`market_name` AS `market`,`s`.`sector_name` AS `sector` from (`Market` `m` left join `Sector` `s` on((`m`.`sector_id` = `s`.`sector_id`)))), `system_identifier` as (select `ts`.`system_id` AS `system_id`,`ts`.`system_code` AS `system_code`,`ts`.`system_name` AS `system_name` from `Trading_System` `ts`) select `ct`.`trade_id` AS `trade_id`,`ct`.`trade_identifier` AS `trade_identifier`,`ct`.`trade_date` AS `trade_date`,`ct`.`op_type` AS `op_type`,`si`.`system_code` AS `system_code`,`si`.`system_name` AS `system_name`,`ct`.`profit` AS `profit`,`ms`.`market` AS `market`,`ms`.`sector` AS `sector` from ((`closed_trades` `ct` left join `market_sector` `ms` on((`ct`.`market_id` = `ms`.`market_id`))) left join `system_identifier` `si` on((`ct`.`system_id` = `si`.`system_id`))) where (`ct`.`trade_date` like '2021%') ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `dataset_2022`
+--
+DROP TABLE IF EXISTS `dataset_2022`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `dataset_2022`  AS  with `closed_trades` as (select `tro`.`trade_id` AS `trade_id`,`tro`.`trade_identifier` AS `trade_identifier`,`tro`.`trade_date` AS `trade_date`,`op`.`op_type` AS `op_type`,`tro`.`system_id` AS `system_id`,`tro`.`market_id` AS `market_id`,`tro`.`profit` AS `profit` from (`Trading_operation` `tro` left join `Operation` `op` on((`tro`.`operation_id` = `op`.`op_id`))) where (`op`.`op_type` = 'close')), `market_sector` as (select `m`.`market_id` AS `market_id`,`m`.`market_name` AS `market`,`s`.`sector_name` AS `sector` from (`Market` `m` left join `Sector` `s` on((`m`.`sector_id` = `s`.`sector_id`)))), `system_identifier` as (select `ts`.`system_id` AS `system_id`,`ts`.`system_code` AS `system_code`,`ts`.`system_name` AS `system_name` from `Trading_System` `ts`) select `ct`.`trade_id` AS `trade_id`,`ct`.`trade_identifier` AS `trade_identifier`,`ct`.`trade_date` AS `trade_date`,`ct`.`op_type` AS `op_type`,`si`.`system_code` AS `system_code`,`si`.`system_name` AS `system_name`,`ct`.`profit` AS `profit`,`ms`.`market` AS `market`,`ms`.`sector` AS `sector` from ((`closed_trades` `ct` left join `market_sector` `ms` on((`ct`.`market_id` = `ms`.`market_id`))) left join `system_identifier` `si` on((`ct`.`system_id` = `si`.`system_id`))) where (`ct`.`trade_date` like '2022%') ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `todays_closed_trades`
+--
+DROP TABLE IF EXISTS `todays_closed_trades`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`%` SQL SECURITY DEFINER VIEW `todays_closed_trades`  AS  with `closed_trades` as (select `tro`.`trade_id` AS `trade_id`,`tro`.`trade_identifier` AS `trade_identifier`,`tro`.`trade_date` AS `trade_date`,`op`.`op_type` AS `op_type`,`tro`.`system_id` AS `system_id`,`tro`.`market_id` AS `market_id`,`tro`.`profit` AS `profit` from (`Trading_operation` `tro` left join `Operation` `op` on((`tro`.`operation_id` = `op`.`op_id`))) where (`op`.`op_type` = 'close')), `market_sector` as (select `m`.`market_id` AS `market_id`,`m`.`market_name` AS `market`,`s`.`sector_name` AS `sector` from (`Market` `m` left join `Sector` `s` on((`m`.`sector_id` = `s`.`sector_id`)))), `system_identifier` as (select `ts`.`system_id` AS `system_id`,`ts`.`system_code` AS `system_code`,`ts`.`system_name` AS `system_name` from `Trading_System` `ts`) select `ct`.`trade_id` AS `trade_id`,`ct`.`trade_identifier` AS `trade_identifier`,`ct`.`trade_date` AS `trade_date`,`ct`.`op_type` AS `op_type`,`si`.`system_code` AS `system_code`,`si`.`system_name` AS `system_name`,`ct`.`profit` AS `profit`,`ms`.`market` AS `market`,`ms`.`sector` AS `sector` from ((`closed_trades` `ct` left join `market_sector` `ms` on((`ct`.`market_id` = `ms`.`market_id`))) left join `system_identifier` `si` on((`ct`.`system_id` = `si`.`system_id`))) where (`ct`.`trade_date` = curdate()) ;
+
 --
 -- Indexes for dumped tables
 --
@@ -1512,7 +1689,8 @@ ALTER TABLE `Sector`
 -- Indexes for table `Trading_operation`
 --
 ALTER TABLE `Trading_operation`
-  ADD PRIMARY KEY (`trade_id`);
+  ADD PRIMARY KEY (`trade_id`),
+  ADD KEY `trade_date_ind` (`trade_date`);
 
 --
 -- Indexes for table `Trading_System`
