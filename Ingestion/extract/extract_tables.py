@@ -17,8 +17,8 @@ def get_src_tables(engine):
     query = f"""SELECT table_name
             FROM information_schema.tables 
             WHERE table_schema = '{database}' 
-                AND table_type = 'BASE_TABLE'
-                AND table_name IN ('Market', 'Sector', 'Trading_system', 'Operation', Trading_operation)"""
+                AND table_type = 'BASE TABLE'
+                AND table_name IN ('Market', 'Sector', 'Trading_System', 'Operation', 'Trading_operation')"""
     try:
         df = pd.read_sql_query(query, engine)
         tbl_dict = df.to_dict('dict')

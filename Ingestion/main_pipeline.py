@@ -1,6 +1,6 @@
 import os
 
-import pandas as pd
+#import pandas as pd
 from Ingestion.storage.connection import close_conn, create_db_conn #create_conn,
 from Ingestion.extract.to_landing import load_table_to_landing, read_source_table
 from Ingestion.transformation.etl import (

@@ -1,3 +1,3 @@
-\c retail_sales
+\c TFEmployee
 CREATE SCHEMA landing_area; 
 CREATE SCHEMA staging_area;
