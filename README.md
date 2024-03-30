@@ -57,7 +57,7 @@ psql -U postgres
 \c TFEmployee
 SELECT * FROM landing_area."Trade_results"
 ```
-The pipeline can be tested by putting the code in a seperate container using a dockerfile to check the performance of the python script. Open another terminal, enter into the test folder, then enter
+The pipeline can be tested by putting the code in a seperate container using a dockerfile to check the performance of the python script. Open another terminal, enter into the project folder, then enter
 ```
 # incase it already exists
 docker image rm pipeline:latest -f
