@@ -25,9 +25,11 @@ def read_table(engine, table_name):
 
 def clean_data(df):
     # data cleaning
-    df['SUPPLIER'] = df['SUPPLIER'].fillna("NO SUPPLIER")
-    df['ITEM TYPE'] = df['ITEM TYPE'].fillna("NO ITEM TYPE")
-    df['RETAIL SALES'] = df['RETAIL SALES'].fillna(-1)
+    df['op_type'] = df['op_type'].fillna("No operations")
+    df['system_name'] = df['system_name'].fillna("No name")
+    df['market'] = df['market'].fillna("Unidentified market")
+    df['sector'] = df['sector'].fillna("Unidentified sector")
+    df['profit'] = df['profit'].fillna(-1)
 
     return df
 
@@ -35,39 +37,57 @@ def clean_data(df):
 def create_schema(df):
     """Build a star schema"""
 
-    supplier_df = df[['SUPPLIER']]
-    supplier_df = supplier_df.drop_duplicates()
-    supplier_df = supplier_df.reset_index(drop=True)
-    supplier_df = supplier_df.reset_index(names="SUPPLIER_ID")
-    supplier_df["SUPPLIER_ID"] += 1
+    dim_operation = df[['op_type']]
+    dim_operation = dim_operation.drop_duplicates()
+    dim_operation = dim_operation.reset_index(drop=True)
+    dim_operation = dim_operation.reset_index(names="op_id")
+    dim_operation["op_id"] += 1
 
-    item_df = df[['ITEM CODE', 'ITEM TYPE', 'ITEM DESCRIPTION']]
-    item_df = item_df.rename(
+    dim_system = df[['system_code', 'system_name']]
+    dim_system = dim_system.rename(
         columns={
-            'ITEM CODE': 'ITEM_CODE',
-            'ITEM TYPE': 'ITEM_TYPE',
-            'ITEM DESCRIPTION': 'ITEM_DESCRIPTION',
+            'system_code': 'sys_code',
+            'system_name': 'sys_name',
         }
     )
-    item_df = item_df.drop_duplicates()
+    dim_system = dim_system.drop_duplicates()
 
-    date_df = df[['YEAR', 'MONTH']]
-    date_df = date_df.drop_duplicates()
-    date_df = date_df.reset_index(drop=True)
-    date_df = date_df.reset_index(names="DATE_ID")
-    date_df["DATE_ID"] += 1
+    
+    dim_sector = df[['sector']]
+    dim_sector = dim_sector.drop_duplicates()
+    dim_sector = dim_sector.reset_index(drop=True)
+    dim_sector = dim_sector.reset_index(names="sector_id")
+    dim_sector["sector_id"] += 1
+
+
+    dim_market = df[['market']]
+    dim_market = dim_market.drop_duplicates()
+    dim_market = dim_market.reset_index(drop=True)
+    dim_market = dim_market.reset_index(names="market_id")
+    dim_market["market_id"] += 1
+    
+
+    dim_date = df[['trade_date']]
+    dim_date = dim_date.drop_duplicates()
+    dim_date = dim_date.reset_index(drop=True)
+    dim_date = dim_date.reset_index(names="date_id")
+    dim_date["date_id"] += 1
 
     fact_table = (
-        df.merge(supplier_df, on='SUPPLIER')
-        .merge(item_df, left_on="ITEM CODE", right_on="ITEM_CODE")
-        .merge(date_df, on=["YEAR", "MONTH"])[
+        df.merge(dim_operation, on='op_type')
+        .merge(dim_system, left_on="system_code", right_on="sys_code")
+        .merge(dim_market, on='market')
+        .merge(dim_sector, on='sector')
+        .merge(dim_date, on=["trade_date"])[
             [
-                'ITEM_CODE',
-                'SUPPLIER_ID',
-                'DATE_ID',
-                'RETAIL SALES',
-                'RETAIL TRANSFERS',
-                'WAREHOUSE SALES',
+                'trade_id',
+                'trade_identifier',
+                'date_id',
+                'op_id',
+                'sys_code',
+                'sector_id',
+                'market_id',
+                'profit',
             ]
         ]
     )
@@ -75,10 +95,12 @@ def create_schema(df):
     fact_table = fact_table.drop_duplicates()
 
     return {
-        "Supplier": supplier_df.to_dict(orient="dict"),
-        "Item": item_df.to_dict(orient="dict"),
-        "Date": date_df.to_dict(orient="dict"),
-        "Fact_Sales": fact_table.to_dict(orient="dict"),
+        "dim_operation": dim_operation.to_dict(orient="dict"),
+        "dim_system": dim_system.to_dict(orient="dict"),
+        "dim_sector": dim_sector.to_dict(orient="dict"),
+        "dim_market": dim_market.to_dict(orient="dict"),
+        "dim_date": dim_date.to_dict(orient="dict"),
+        "fact_trades": fact_table.to_dict(orient="dict"),
     }
 
 

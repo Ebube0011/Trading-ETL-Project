@@ -24,7 +24,7 @@ docker network create warehouse-net
 
 ### Specify environment variables
 Inside the 'environment_variables' folder, there are files that will be used to specify certain environment variables depending on the service. Edit the files to specify the values of the variables necessary for the project.
-Be careful if using the 'file path' with airflow as airflow runs its dags in a seperate file path than is in the container. In this case, either use an absolute file path or use code to identify current working directory.
+Be careful if using a 'file path' environment variable with airflow as airflow runs its dags in a seperate file path than is in the container. In this case, either use an absolute file path or use code to identify current working directory.
 
 ### Run the storage containers
 After modifying the environment variables, return to the project directory and proceed to run the storage services. 
@@ -41,6 +41,16 @@ docker compose -f docker-compose-orchestration.yml up -d
 ### Test
 To view results on data warehouse and manually query it
 ```
+# testing the application database
+docker exec -it mysql bash
+mysql -P 3306 --protocol=tcp -u user -p
+
+USE TFEmployee;
+SELECT * FROM Sector;
+
+
+
+# testing the data warehouse
 docker exec -it warehouse bash
 psql -U postgres
 
@@ -53,10 +63,10 @@ The pipeline can be tested by putting the code in a seperate container using a d
 docker image rm pipeline:latest -f
 
 # build the image
-docker build -t pipeline:latest .
+docker build -t pipeline:latest -f test/Dockerfile .
 
 # run and interact with the container
-docker run --rm -it --env-file ../environment_variables/postgres.env --env-file ../environment_variables/others.env --network warehouse-net pipeline bash
+docker run --rm -it --env-file ./environment_variables/mysql.env --env-file ./environment_variables/postgres.env --env-file ./environment_variables/others.env --network warehouse-net --network sourcesystem-net pipeline bash
 
 # run the main pipeline script
 cp Ingestion/main_pipeline.py .
