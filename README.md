@@ -2,7 +2,7 @@
 This project extracts data from a source database system and loads the data into a landing area in the data warehouse. It then proceeds to transform the data and loads this new data into a staging area within the data warehouse. The source system is a mysql transactional database and the data warehouse is a postgres database. Python sqlalchemy is used to perform both the extraction and the loading processes.
 
 ## How to Install and Run the Project
-First, clone the repository into the virtual machine or computer. 
+First, clone the repository into the virtual machine or ubuntu computer. 
 ```
 git clone https://github.com/Ebube0011/Trading-ETL-Project.git
 ```
@@ -24,12 +24,12 @@ docker network create warehouse-net
 
 ### Specify environment variables
 Inside the 'environment_variables' folder, there are files that will be used to specify certain environment variables depending on the service. Edit the files to specify the values of the variables necessary for the project.
-Be careful if using a 'file path' environment variable with airflow as airflow runs its dags in a seperate file path than is in the container. In this case, either use an absolute file path or use code to identify current working directory.
+Be careful if using a 'file path' environment variable with airflow as airflow runs its dags in a seperate file path than is in the container. In that case, either use an absolute file path or use code to identify current working directory.
 
 ### Run the storage containers
 After modifying the environment variables, return to the project directory and proceed to run the storage services. 
 This is done by using the 'docker compose' command. we start by running the services for the storages, and then the services for orchestration
-For the storages; transactional and warehouse, using a terminal each
+For the storages; transactional and warehouse. To view performance of each service using a terminal each, remove the '-d' that is at the end of the docker compose command.
 ```
 # for storages
 docker compose -f docker-compose-storage.yml up -d
@@ -38,7 +38,7 @@ docker compose -f docker-compose-storage.yml up -d
 docker compose -f docker-compose-orchestration.yml up -d
 ```
 
-### Test
+### Testing pipeline so far
 To view results on data warehouse and manually query it
 ```
 # testing the application database
@@ -55,7 +55,7 @@ docker exec -it warehouse bash
 psql -U postgres
 
 \c TFEmployee
-SELECT * FROM landing_area."Trade_results"
+SELECT * FROM landing_area."Trade_results";
 ```
 The pipeline can be tested by putting the code in a seperate container using a dockerfile to check the performance of the python script. Open another terminal, enter into the project folder, then enter
 ```
