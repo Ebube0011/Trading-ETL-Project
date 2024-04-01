@@ -7,10 +7,12 @@ This projects objective is to increase trading returns, reduce drawdowns, optimi
 ## Stages of the project
 ### Data Generation
 This is done in a trading application written using MQL4 and uses a mysql database to store transactional data of the trade positions taken as well as the result of the trade. The schema is below
+
 ![Trading_Employee_Project-Generation drawio](https://github.com/Ebube0011/Trading-ETL-Project/assets/149321069/bb807d7e-4520-400d-9455-a2bc055dbf54)
 
 ### Ingestion
 Data is ingested using the mysql connector + sqlalchemy, transformed, and loaded into the data warehouse landing area. An orchestration tool (airflow) is used to schedule the ingestion tasks and alerts when there is a failed task. The data ingested has a typical volume in kilobytes, ingested daily, and will be used for analytics and reverse ETL.
+
 ![Trading_Employee_Project-Ingestion drawio](https://github.com/Ebube0011/Trading-ETL-Project/assets/149321069/b793c7ef-65a6-4162-9573-e2a09ca8ee55)
 
 ## How to Install and Run the Project
