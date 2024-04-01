@@ -1,6 +1,18 @@
 # Trading-ETL-Project
 This project extracts data from a source database system and loads the data into a landing area in the data warehouse. It then proceeds to transform the data and loads this new data into a staging area within the data warehouse. The source system is a mysql transactional database and the data warehouse is a postgres database. Python sqlalchemy is used to perform both the extraction and the loading processes.
 
+# Objective
+This projects objective is to increase trading returns, reduce drawdowns, optimize overall performance of the trading systems, and perform analytics to better understand performance of the system's trading performance. It is designed to ingest data from an application database for analytics. The data can then be ananlysed and then used to optimize the performance of the application. 
+
+## Stages of the project
+### Data Generation
+This is done in a trading application written using MQL4 and uses a mysql database to store transactional data of the trade positions taken as well as the result of the trade. The schema is below
+![Trading_Employee_Project-Generation drawio](https://github.com/Ebube0011/Trading-ETL-Project/assets/149321069/bb807d7e-4520-400d-9455-a2bc055dbf54)
+
+### Ingestion
+Data is ingested using the mysql connector + sqlalchemy, transformed, and loaded into the data warehouse landing area. An orchestration tool (airflow) is used to schedule the ingestion tasks and alerts when there is a failed task. The data ingested has a typical volume in kilobytes, ingested daily, and will be used for analytics and reverse ETL.
+![Trading_Employee_Project-Ingestion drawio](https://github.com/Ebube0011/Trading-ETL-Project/assets/149321069/b793c7ef-65a6-4162-9573-e2a09ca8ee55)
+
 ## How to Install and Run the Project
 First, clone the repository into the virtual machine or ubuntu computer. 
 ```
