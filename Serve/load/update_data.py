@@ -20,12 +20,12 @@ def update_system_stats(engine, df):
 
                 winrate_sql = text(f""" 
                     UPDATE Trading_System
-                    SET winrate = {winrate}
-                    WHERE system_code = {sys_code}""")
+                    SET winrate = {winrate:.4f}
+                    WHERE system_code = {sys_code:.2f}""")
                 rr_ratio_sql = text(f""" 
                     UPDATE Trading_System
-                    SET rr_ratio = {rr_ratio}
-                    WHERE system_code = {sys_code}""")
+                    SET rr_ratio = {rr_ratio:.2f}
+                    WHERE system_code = {sys_code:.2f}""")
                 
                 conn.execute(winrate_sql.execution_options(autocommit=True))
                 conn.execute(rr_ratio_sql.execution_options(autocommit=True))
