@@ -29,6 +29,7 @@ def update_system_stats(engine, df):
                 
                 conn.execute(winrate_sql.execution_options(autocommit=True))
                 conn.execute(rr_ratio_sql.execution_options(autocommit=True))
+                conn.commit()
         logger.info("system stats updated in source system!!!")
 
     except Exception as e:
